@@ -11,6 +11,7 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
+        "postinstall": "npm run build-library",
         "build-demo": "mkdir -p ./build/demo && cp -r ./demo ./build/ && cp ./node_modules/three/build/three.module.js ./build/demo/lib/three.module.js",
         "build-library": "npx rollup -c && mkdir -p ./build/demo/lib && cp ./build/gaussian-splat-3d* ./build/demo/lib/",
         "build": "npm run build-library && npm run build-demo",
