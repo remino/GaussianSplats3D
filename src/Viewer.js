@@ -349,7 +349,8 @@ export class Viewer {
     loadFile(fileURL, options = {}) {
         if (options.position) options.position = new THREE.Vector3().fromArray(options.position);
         if (options.orientation) options.orientation = new THREE.Quaternion().fromArray(options.orientation);
-        options.splatAlphaRemovalThreshold = options.splatAlphaRemovalThreshold || 1;
+        options.attrsTransforms = options.attrsTransforms || [];
+        options.splatFilters = options.splatFilters || [];
         options.halfPrecisionCovariancesOnGPU = !!options.halfPrecisionCovariancesOnGPU;
         const loadingSpinner = new LoadingSpinner();
         loadingSpinner.show();
@@ -377,7 +378,7 @@ export class Viewer {
             .then((splatBuffer) => {
                 loadingSpinner.setMessage(`Processing splats...`);
                 window.setTimeout(() => {
-                    this.setupSplatMesh(splatBuffer, options.splatAlphaRemovalThreshold, options.position,
+                    this.setupSplatMesh(splatBuffer, options.attrsTransforms, options.splatFilters, options.position,
                                         options.orientation, options.halfPrecisionCovariancesOnGPU);
                     this.setupSortWorker(splatBuffer).then(() => {
                         loadingSpinner.hide();
@@ -386,18 +387,19 @@ export class Viewer {
                 }, 1);
             })
             .catch((e) => {
+                console.error(e);
                 reject(new Error(`Viewer::loadFile -> Could not load file ${fileURL}`));
             });
         });
     }
 
-    setupSplatMesh(splatBuffer, splatAlphaRemovalThreshold = 1, position = new THREE.Vector3(), quaternion = new THREE.Quaternion(),
+    setupSplatMesh(splatBuffer, attrsTransforms, splatFilters, position = new THREE.Vector3(), quaternion = new THREE.Quaternion(),
                    halfPrecisionCovariancesOnGPU = false) {
         const splatCount = splatBuffer.getSplatCount();
         console.log(`Splat count: ${splatCount}`);
 
         splatBuffer.buildPreComputedBuffers();
-        this.splatMesh = SplatMesh.buildMesh(splatBuffer, splatAlphaRemovalThreshold, halfPrecisionCovariancesOnGPU);
+        this.splatMesh = SplatMesh.buildMesh(splatBuffer, attrsTransforms, splatFilters, halfPrecisionCovariancesOnGPU);
         this.splatMesh.position.copy(position);
         this.splatMesh.quaternion.copy(quaternion);
         this.splatMesh.frustumCulled = false;

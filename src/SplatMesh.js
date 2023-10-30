@@ -4,20 +4,21 @@ import { uintEncodedFloat, rgbaToInteger } from './Util.js';
 
 export class SplatMesh extends THREE.Mesh {
 
-    static buildMesh(splatBuffer, splatAlphaRemovalThreshold = 1, halfPrecisionCovariancesOnGPU = false) {
+    static buildMesh(splatBuffer, attrsTransforms, splatFilters, halfPrecisionCovariancesOnGPU = false) {
         const geometry = SplatMesh.buildGeomtery(splatBuffer);
         const material = SplatMesh.buildMaterial();
-        return new SplatMesh(splatBuffer, geometry, material, splatAlphaRemovalThreshold, halfPrecisionCovariancesOnGPU);
+        return new SplatMesh(splatBuffer, geometry, material, attrsTransforms, splatFilters, halfPrecisionCovariancesOnGPU);
     }
 
-    constructor(splatBuffer, geometry, material, splatAlphaRemovalThreshold = 1, halfPrecisionCovariancesOnGPU = false) {
+    constructor(splatBuffer, geometry, material, attrsTransforms, splatFilters, halfPrecisionCovariancesOnGPU = false) {
         super(geometry, material);
         this.splatBuffer = splatBuffer;
         this.geometry = geometry;
         this.material = material;
         this.splatTree = null;
         this.splatDataTextures = null;
-        this.splatAlphaRemovalThreshold = splatAlphaRemovalThreshold;
+        this.attrsTransforms = attrsTransforms || [];
+        this.splatFilters = splatFilters || [];
         this.halfPrecisionCovariancesOnGPU = halfPrecisionCovariancesOnGPU;
         this.buildSplatTree();
         this.resetLocalSplatDataAndTexturesFromSplatBuffer();
@@ -239,13 +240,30 @@ export class SplatMesh extends THREE.Mesh {
     }
 
     buildSplatTree() {
-
         this.splatTree = new SplatTree(8, 5000);
         console.time('SplatTree build');
         const splatColor = new THREE.Vector4();
+        const splatPosition = new THREE.Vector3();
+        console.log(this.splatFilters);
+
         this.splatTree.processSplatBuffer(this.splatBuffer, (splatIndex) => {
             this.splatBuffer.getColor(splatIndex, splatColor);
-            return splatColor.w > this.splatAlphaRemovalThreshold;
+            this.splatBuffer.getPosition(splatIndex, splatPosition);
+
+            const splatAttrs = this.attrsTransforms.reduce(
+                (attrs, transform) => transform(attrs) || attrs,
+                {
+                    x: splatPosition.x,
+                    y: splatPosition.y,
+                    z: splatPosition.z,
+                    r: splatColor.x,
+                    g: splatColor.y,
+                    b: splatColor.z,
+                    a: splatColor.w
+                }
+            );
+
+            return this.splatFilters.some((filter) => !filter(splatAttrs));
         });
         console.timeEnd('SplatTree build');
 
