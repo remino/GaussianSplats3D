@@ -2,7 +2,8 @@ import { SplatBuffer } from './SplatBuffer.js';
 
 export class SplatLoader {
 
-    constructor(splatBuffer = null) {
+    constructor({ docElement, splatBuffer = null }) {
+        this.docElement = docElement || document.body;
         this.splatBuffer = splatBuffer;
         this.downLoadLink = null;
     }
@@ -35,7 +36,7 @@ export class SplatLoader {
 
         if (!this.downLoadLink) {
             this.downLoadLink = document.createElement('a');
-            document.body.appendChild(this.downLoadLink);
+            this.docElement.appendChild(this.downLoadLink);
         }
         this.downLoadLink.download = fileName;
         this.downLoadLink.href = URL.createObjectURL(blob);

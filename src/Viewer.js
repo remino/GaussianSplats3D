@@ -97,15 +97,15 @@ export class Viewer {
         }
     }
 
-    init() {
-
+    init(docElement) {
+        this.docElement = docElement || document.body;
         this.setupInfoPanel();
 
         if (!this.rootElement && !this.usingExternalRenderer) {
             this.rootElement = document.createElement('div');
             this.rootElement.style.width = '100%';
             this.rootElement.style.height = '100%';
-            document.body.appendChild(this.rootElement);
+            this.docElement.appendChild(this.rootElement);
         }
 
         const renderDimensions = new THREE.Vector2();
@@ -207,7 +207,7 @@ export class Viewer {
 
         this.infoPanel.appendChild(infoTable);
         this.infoPanel.style.display = 'none';
-        document.body.appendChild(this.infoPanel);
+        this.docElement.appendChild(this.infoPanel);
     }
 
     updateSplatRenderTargetForRenderDimensions(width, height) {
