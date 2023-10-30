@@ -307,7 +307,8 @@ export class Viewer {
     loadFile(fileName, options = {}) {
         if (options.position) options.position = new THREE.Vector3().fromArray(options.position);
         if (options.orientation) options.orientation = new THREE.Quaternion().fromArray(options.orientation);
-        options.splatAlphaRemovalThreshold = options.splatAlphaRemovalThreshold || 0;
+        options.attrsTransforms = options.attrsTransforms || [];
+        options.splatFilters = options.splatFilters || [];
         options.halfPrecisionCovariances = !!options.halfPrecisionCovariances;
         const loadingSpinner = new LoadingSpinner();
         loadingSpinner.show();
@@ -323,7 +324,7 @@ export class Viewer {
             fileLoadPromise
             .then((splatBuffer) => {
                 this.setupSplatMesh(splatBuffer, options.position, options.orientation,
-                                    options.splatAlphaRemovalThreshold, options.halfPrecisionCovariances);
+                                    options.splatFilters, options.attrsTransforms, options.halfPrecisionCovariances);
                 return this.setupSortWorker(splatBuffer);
             })
             .then(() => {
