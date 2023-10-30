@@ -337,8 +337,8 @@ export class Viewer {
     }
 
     setupSplatMesh(splatBuffer, position = new THREE.Vector3(), quaternion = new THREE.Quaternion(),
-                   splatAlphaRemovalThreshold = 0, halfPrecisionCovariances = false) {
-        splatBuffer.optimize(splatAlphaRemovalThreshold);
+                   splatFilters = [], attrsTransforms = [], halfPrecisionCovariances = false) {
+        splatBuffer.optimize(splatFilters, attrsTransforms);
         const splatCount = splatBuffer.getSplatCount();
         console.log(`Splat count: ${splatCount}`);
 

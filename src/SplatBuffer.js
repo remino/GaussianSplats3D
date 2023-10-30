@@ -48,21 +48,51 @@ export class SplatBuffer {
         }
     }
 
-    optimize(minAlpha) {
+    optimize(splatFilters = [], attrsTransforms = []) {
         let splatCount = this.getSplatCount();
         const oldSplatCount = splatCount;
         const oldByteCount = splatCount * SplatBuffer.RowSizeBytes;
 
         let index = 0;
+
         while (index < splatCount) {
+            const position = this.getPosition(index, tempVector3A);
             const colorBase = SplatBuffer.RowSizeBytes * index + SplatBuffer.ColorRowOffsetBytes;
+            const rgb = [
+                this.uint8Array[colorBase],
+                this.uint8Array[colorBase + 1],
+                this.uint8Array[colorBase + 2],
+            ];
+            const hsl = getHslFromRgb(...rgb);
             const baseAlpha = this.uint8Array[colorBase + 3];
-            if (baseAlpha <= minAlpha) {
+
+            const splatAttrs = attrsTransforms.reduce(
+                (attrs, transform) => transform(attrs) || attrs,
+                {
+                    // Position
+                    x: position.x,
+                    y: position.y,
+                    z: position.z,
+                    // RGB colour
+                    r: rgb[0],
+                    g: rgb[1],
+                    b: rgb[2],
+                    // HSL colour
+                    h: hsl[0],
+                    s: hsl[1],
+                    l: hsl[2],
+                    // Alpha
+                    a: baseAlpha,
+                },
+            );
+
+            if (splatFilters.some((filter) => filter(splatAttrs))) {
                 this.swapVertices(index, splatCount - 1);
                 splatCount--;
-            } else {
-                index++;
+                continue;
             }
+
+            index++;
         }
 
         const newByteCount = splatCount * SplatBuffer.RowSizeBytes;
