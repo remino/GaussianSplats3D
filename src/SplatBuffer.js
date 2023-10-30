@@ -63,7 +63,6 @@ export class SplatBuffer {
                 this.uint8Array[colorBase + 1],
                 this.uint8Array[colorBase + 2],
             ];
-            const hsl = getHslFromRgb(...rgb);
             const baseAlpha = this.uint8Array[colorBase + 3];
 
             const splatAttrs = attrsTransforms.reduce(
@@ -77,10 +76,6 @@ export class SplatBuffer {
                     r: rgb[0],
                     g: rgb[1],
                     b: rgb[2],
-                    // HSL colour
-                    h: hsl[0],
-                    s: hsl[1],
-                    l: hsl[2],
                     // Alpha
                     a: baseAlpha,
                 },
