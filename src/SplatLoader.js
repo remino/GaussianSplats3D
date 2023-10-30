@@ -2,7 +2,7 @@ import { SplatBuffer } from './SplatBuffer.js';
 
 export class SplatLoader {
 
-    constructor({ docElement, splatBuffer = null }) {
+    constructor({ docElement, splatBuffer = null } = {}) {
         this.docElement = docElement || document.body;
         this.splatBuffer = splatBuffer;
         this.downLoadLink = null;
