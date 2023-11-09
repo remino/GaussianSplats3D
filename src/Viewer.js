@@ -3,7 +3,7 @@ import { OrbitControls } from './OrbitControls.js';
 import { PlyLoader } from './PlyLoader.js';
 import { SplatLoader } from './SplatLoader.js';
 import { SplatBuffer } from './SplatBuffer.js';
-import { LoadingSpinner } from './LoadingSpinner.js';
+// import { LoadingSpinner } from './LoadingSpinner.js';
 import { SceneHelper } from './SceneHelper.js';
 import { Raycaster } from './raycaster/Raycaster.js';
 import { SplatMesh } from './SplatMesh.js';
@@ -310,8 +310,8 @@ export class Viewer {
         options.attrsTransforms = options.attrsTransforms || [];
         options.splatFilters = options.splatFilters || [];
         options.halfPrecisionCovariances = !!options.halfPrecisionCovariances;
-        const loadingSpinner = new LoadingSpinner();
-        loadingSpinner.show();
+        // const loadingSpinner = new LoadingSpinner();
+        // loadingSpinner.show();
         return new Promise((resolve, reject) => {
             let fileLoadPromise;
             if (fileName.endsWith('.splat')) {
@@ -328,7 +328,16 @@ export class Viewer {
                 return this.setupSortWorker(splatBuffer);
             })
             .then(() => {
-                loadingSpinner.hide();
+                this.rootElement.dispatchEvent(
+                    new CustomEvent('splatMeshLoaded', {
+                        detail: {
+                            splatMesh: this.splatMesh
+                        }
+                    })
+                );
+
+                // loadingSpinner.hide();
+
                 resolve();
             })
             .catch((e) => {
